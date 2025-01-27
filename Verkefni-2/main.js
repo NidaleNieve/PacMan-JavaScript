@@ -85,6 +85,10 @@ function updateGameLogic(millisecondsPassed) {
   } else if (direction === "down") {
     pacMan.y += pacSpeed * millisecondsPassed;
   }
+
+  if (direction !== null) {
+    lastDirection = direction;
+  }
   
   //Reiknar hvort að pacman sé kominn fyrir utan
   pacMan.x = Math.max(pacMan.radius, Math.min(canvas.width - pacMan.radius, pacMan.x));
