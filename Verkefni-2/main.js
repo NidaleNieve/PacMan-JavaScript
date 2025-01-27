@@ -35,6 +35,7 @@ let pacMan = {
 function drawScene() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     pacMan.draw();
+    console.log(direction) //prenta út direction arrayið, alveg safe að deleta
 }
 
 //breytur fyrir munnin
@@ -74,20 +75,20 @@ function updateAnimation(millisecondsPassed) {
 }
 
 const pacSpeed = 0.5; //pixels per millisecond
-let direction = null;
+let direction = [];
 function updateGameLogic(millisecondsPassed) {
-  if (direction === "left") {
+  if (direction[direction.length - 1] === "left") {
       pacMan.x -= pacSpeed * millisecondsPassed;
-  } else if (direction === "right") {
+  } else if (direction[direction.length - 1] === "right") {
     pacMan.x += pacSpeed * millisecondsPassed;
-  } else if (direction === "up") {
+  } else if (direction[direction.length - 1] === "up") {
     pacMan.y -= pacSpeed * millisecondsPassed;
-  } else if (direction === "down") {
+  } else if (direction[direction.length - 1] === "down") {
     pacMan.y += pacSpeed * millisecondsPassed;
   }
 
-  if (direction !== null) {
-    lastDirection = direction;
+  if (direction.length !== 0) {
+    lastDirection = direction[direction.length - 1];
   }
   
   //Reiknar hvort að pacman sé kominn fyrir utan
@@ -119,23 +120,28 @@ document.addEventListener('keydown', (event) => {
   switch (event.code) {
     case "ArrowLeft":
     case "KeyA":
-      direction = "left"
-      console.log("Vinstri")
+      //ef að left er ekki í arrayinu þá bætir það við
+      if (direction.indexOf("left") == -1) {
+        direction.push("left");
+      }
       break;
     case "ArrowRight":
     case "KeyD":
-      direction = "right"
-      console.log("Hægri")
+      if (direction.indexOf("right") == -1) {
+        direction.push("right");
+      }
       break;
     case "ArrowUp":
     case "KeyW":
-      direction = "up"
-      console.log("Upp")
+      if (direction.indexOf("up") == -1) {
+        direction.push("up");
+      }
       break;
     case "ArrowDown":
     case "KeyS":
-      direction = "down"
-      console.log("Niður")
+      if (direction.indexOf("down") == -1) {
+        direction.push("down");
+      }
       break;
     default:
       return;
@@ -147,31 +153,20 @@ document.addEventListener('keyup', (event) => {
   switch (event.code) {
     case "ArrowLeft":
     case "KeyA":
-      if (direction === "left") {
-        direction = null;
-      }
-      console.log("Vinstri keyup");
+      //tek út left þegar takkanum er sleppt, það þarf ekki if, vegna þess að keyup keyrir bara einu sinni
+      direction.splice(direction.indexOf("left"), 1);
       break;
     case "ArrowRight":
     case "KeyD":
-      if (direction === "right") {
-        direction = null;
-      }
-      console.log("Hægri keyup");
+      direction.splice(direction.indexOf("right"), 1);
       break;
     case "ArrowUp":
     case "KeyW":
-      if (direction === "up") {
-        direction = null;
-      }
-      console.log("Upp keyup");
+      direction.splice(direction.indexOf("up"), 1);
       break;
     case "ArrowDown":
     case "KeyS":
-      if (direction === "down") {
-        direction = null;
-      }
-      console.log("Niður keyup");
+      direction.splice(direction.indexOf("down"), 1);
       break;
   }
 });

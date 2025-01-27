@@ -1,4 +1,4 @@
-const canvas = document.getElementById("test");
+const canvas = document.getElementById("theCanvas");
 const ctx = canvas.getContext("2d");
 const margin = 15;
 
@@ -35,6 +35,7 @@ let pacMan = {
 function drawScene() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     pacMan.draw();
+    console.log(direction) //prenta út direction arrayið, alveg safe að deleta
 }
 
 //breytur fyrir munnin
@@ -73,8 +74,6 @@ function updateAnimation(millisecondsPassed) {
   }
 }
 
-
-
 const pacSpeed = 0.5; //pixels per millisecond
 let direction = [];
 function updateGameLogic(millisecondsPassed) {
@@ -110,8 +109,6 @@ function logicLoop(timeStamp) {
     updateAnimation(millisecondsPassed);
     //teikna allt
     drawScene();
-
-    console.log(lastDirection)
     
     //kallar á sig sjálft aftur, þannig að það verði loop
     window.requestAnimationFrame(logicLoop);
@@ -127,28 +124,24 @@ document.addEventListener('keydown', (event) => {
       if (direction.indexOf("left") == -1) {
         direction.push("left");
       }
-      console.log("Vinstri");
       break;
     case "ArrowRight":
     case "KeyD":
       if (direction.indexOf("right") == -1) {
         direction.push("right");
       }
-      console.log("Hægri")
       break;
     case "ArrowUp":
     case "KeyW":
       if (direction.indexOf("up") == -1) {
         direction.push("up");
       }
-      console.log("Upp")
       break;
     case "ArrowDown":
     case "KeyS":
       if (direction.indexOf("down") == -1) {
         direction.push("down");
       }
-      console.log("Niður")
       break;
     default:
       return;
@@ -162,22 +155,18 @@ document.addEventListener('keyup', (event) => {
     case "KeyA":
       //tek út left þegar takkanum er sleppt, það þarf ekki if, vegna þess að keyup keyrir bara einu sinni
       direction.splice(direction.indexOf("left"), 1);
-      console.log("Vinstri keyup");
       break;
     case "ArrowRight":
     case "KeyD":
       direction.splice(direction.indexOf("right"), 1);
-      console.log("Hægri keyup");
       break;
     case "ArrowUp":
     case "KeyW":
       direction.splice(direction.indexOf("up"), 1);
-      console.log("Upp keyup");
       break;
     case "ArrowDown":
     case "KeyS":
       direction.splice(direction.indexOf("down"), 1);
-      console.log("Niður keyup");
       break;
   }
 });
@@ -193,4 +182,3 @@ window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resiz
 resizeCanvas() //stilli upp canvas size 
 drawScene()
 window.requestAnimationFrame(logicLoop); //starta loopið
-
