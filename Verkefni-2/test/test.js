@@ -76,7 +76,13 @@ function updateAnimation(millisecondsPassed) {
 
 
 const pacSpeed = 0.5; //pixels per millisecond
-let direction = null;
+let direction = {
+  left: false,
+  right: false,
+  down: false,
+  up: false,
+  lastDirection: []
+};
 function updateGameLogic(millisecondsPassed) {
   if (direction === "left") {
       pacMan.x -= pacSpeed * millisecondsPassed;
@@ -110,6 +116,8 @@ function logicLoop(timeStamp) {
     updateAnimation(millisecondsPassed);
     //teikna allt
     drawScene();
+
+    console.log(direction)
     
     //kallar á sig sjálft aftur, þannig að það verði loop
     window.requestAnimationFrame(logicLoop);
@@ -121,22 +129,22 @@ document.addEventListener('keydown', (event) => {
   switch (event.code) {
     case "ArrowLeft":
     case "KeyA":
-      direction = "left"
-      console.log("Vinstri")
+      direction.left = true;
+      console.log("Vinstri");
       break;
     case "ArrowRight":
     case "KeyD":
-      direction = "right"
+      direction.right = true;
       console.log("Hægri")
       break;
     case "ArrowUp":
     case "KeyW":
-      direction = "up"
+      direction.up = true;
       console.log("Upp")
       break;
     case "ArrowDown":
     case "KeyS":
-      direction = "down"
+      direction.down = true;
       console.log("Niður")
       break;
     default:
@@ -149,30 +157,26 @@ document.addEventListener('keyup', (event) => {
   switch (event.code) {
     case "ArrowLeft":
     case "KeyA":
-      if (direction === "left") {
-        direction = null;
-      }
+      direction.left = false;
+      direction.lastDirection.push["left"]
       console.log("Vinstri keyup");
       break;
     case "ArrowRight":
     case "KeyD":
-      if (direction === "right") {
-        direction = null;
-      }
+      direction.right = false;
+      direction.lastDirection.push["right"]
       console.log("Hægri keyup");
       break;
     case "ArrowUp":
     case "KeyW":
-      if (direction === "up") {
-        direction = null;
-      }
+      direction.up = false;
+      direction.lastDirection.push["up"]
       console.log("Upp keyup");
       break;
     case "ArrowDown":
     case "KeyS":
-      if (direction === "down") {
-        direction = null;
-      }
+      direction.down = false;
+      direction.lastDirection.push["down"]
       console.log("Niður keyup");
       break;
   }
