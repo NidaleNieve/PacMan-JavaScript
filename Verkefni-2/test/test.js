@@ -32,15 +32,24 @@ let pacMan = {
 };
 
 class ghosts {
-  constructor(x, y, fillColor) {
+  constructor(x, y, radius, fillColor, pupilOffset, pupilRadius) {
     this.x = x;
     this.y = y;
     this.fillColor = fillColor;
-    this.radius = 25;
+    this.radius = radius;
     this.color = "black";
     this.lineWidth = 1.5;
 
+    //augu
+    this.leftEyeX = this.x - 9;
+    this.leftEyeY = this.y - 7;
+    this.rightEyeX = this.x + 9;
+    this.rightEyeY = this.y - 7;
+
+    this.pupilOffset = pupilOffset;
+    this.pupilRadius = pupilRadius;
   };
+
   draw() {
     //Teikna búkin
     ctx.beginPath();
@@ -53,7 +62,7 @@ class ghosts {
 
     //Teikna vinstra auga
     ctx.beginPath();
-    ctx.arc(this.x-9, this.y -7, this.radius / 3.5, 0, Math.PI * 2);
+    ctx.arc(this.leftEyeX, this.leftEyeY, this.radius / 3.5, 0, Math.PI * 2);
     ctx.fillStyle = "white";
     ctx.fill();
     ctx.lineWidth = this.lineWidth;
@@ -62,12 +71,34 @@ class ghosts {
 
     //Teikna hægra augua
     ctx.beginPath();
-    ctx.arc(this.x+9, this.y -7, this.radius / 3.5, 0, Math.PI * 2);
+    ctx.arc(this.rightEyeX, this.rightEyeY, this.radius / 3.5, 0, Math.PI * 2);
     ctx.fillStyle = "white";
     ctx.fill();
     ctx.lineWidth = this.lineWidth;
     ctx.strokeStyle = this.color;
     ctx.stroke();
+
+    // Reikna angleið á milli pacman og draugsins einhvernveginn
+    this.angle = Math.atan2(pacMan.y - this.y, pacMan.x - this.x); // Angle in radians
+
+    //Reikna staðsetningu á pupillunum með því að nota angle breytuna og eitthvað idk
+    this.leftPupilX = this.leftEyeX + Math.cos(this.angle) * (this.radius / this.pupilOffset);
+    this.leftPupilY = this.leftEyeY + Math.sin(this.angle) * (this.radius / this.pupilOffset);
+    
+    this.rightPupilX = this.rightEyeX + Math.cos(this.angle) * (this.radius / this.pupilOffset);
+    this.rightPupilY = this.rightEyeY + Math.sin(this.angle) * (this.radius / this.pupilOffset);
+
+    // Teikna vinstra pupil
+    ctx.beginPath();
+    ctx.arc(this.leftPupilX, this.leftPupilY, this.radius / this.pupilRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.fill();
+
+    // Teikna hægra pupil
+    ctx.beginPath();
+    ctx.arc(this.rightPupilX, this.rightPupilY, this.radius / this.pupilRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.fill();
   }
 }
 
@@ -219,7 +250,7 @@ function resizeCanvas() {
 }
 
 //initializers
-pinky = new ghosts(200, 200, "pink");
+pinky = new ghosts(200, 200, 25, "pink", 5, 7);
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
 resizeCanvas() //stilli upp canvas size 
 drawScene()
