@@ -1,4 +1,4 @@
-const canvas = document.getElementById("theCanvas");
+const canvas = document.getElementById("test");
 const ctx = canvas.getContext("2d");
 const margin = 15;
 
@@ -31,10 +31,31 @@ let pacMan = {
   },
 };
 
+class ghosts {
+  constructor(x, y, fillColor) {
+    this.x = x;
+    this.y = y;
+    this.fillColor = fillColor;
+    this.radius = 25;
+    this.color = "black";
+    this.lineWidth = 1.5;
+
+  };
+  draw() {
+    //Teikna 
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.fillColor;
+    ctx.fill();
+    ctx.lineWidth = this.lineWidth;
+    ctx.strokeStyle = this.color;
+    ctx.stroke();
+  }
+}
 //Hérna set ég öll objects sem ég vill teikna
 function drawScene() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    pacMan.draw();
+    pinky.draw();
     console.log(direction) //prenta út direction arrayið, alveg safe að deleta
 }
 
@@ -178,6 +199,7 @@ function resizeCanvas() {
 }
 
 //initializers
+pinky = new ghosts(200, 200, "pink");
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
 resizeCanvas() //stilli upp canvas size 
 drawScene()
