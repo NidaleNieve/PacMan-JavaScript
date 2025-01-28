@@ -42,21 +42,41 @@ class ghosts {
 
   };
   draw() {
-    //Teikna 
+    //Teikna búkin
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = this.fillColor;
     ctx.fill();
     ctx.lineWidth = this.lineWidth;
     ctx.strokeStyle = this.color;
+    ctx.stroke(); 
+
+    //Teikna vinstra auga
+    ctx.beginPath();
+    ctx.arc(this.x-9, this.y -7, this.radius / 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.lineWidth = this.lineWidth;
+    ctx.strokeStyle = this.color;
+    ctx.stroke();
+
+    //Teikna hægra augua
+    ctx.beginPath();
+    ctx.arc(this.x+9, this.y -7, this.radius / 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.lineWidth = this.lineWidth;
+    ctx.strokeStyle = this.color;
     ctx.stroke();
   }
 }
+
 //Hérna set ég öll objects sem ég vill teikna
 function drawScene() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    pinky.draw();
-    console.log(direction) //prenta út direction arrayið, alveg safe að deleta
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pinky.draw();
+  pacMan.draw();
+  console.log(direction) //prenta út direction arrayið, alveg safe að deleta
 }
 
 //breytur fyrir munnin
