@@ -32,7 +32,7 @@ let pacMan = {
 };
 
 class Ghosts {
-  constructor(x, y, radius, fillColor, pupilOffset, pupilRadius, speed, directionMargin) {
+  constructor(x, y, radius, fillColor, pupilOffset, pupilRadius, speed, betterMove, directionMargin) {
     this.x = x;
     this.y = y;
     this.fillColor = fillColor;
@@ -40,6 +40,7 @@ class Ghosts {
     this.color = "black";
     this.lineWidth = 1.5;
     this.speed = speed;
+    this.betterMove = betterMove;
     this.directionMargin = directionMargin;
 
     //augu
@@ -47,19 +48,15 @@ class Ghosts {
     this.pupilRadius = pupilRadius;
   };
 
-  /* Þessi kóði hreyfir drauginn beint að pacman, í hvaða direction sem er,
-  Mjög smooth og genious.
-  updatePosition(millisecondsPassed) {
-    // Calculate the angle between the ghost and Pac-Man
-    const angle = Math.atan2(pacMan.y - this.y, pacMan.x - this.x);
+  updatePosition(millisecondsPassed) {    
+    if (this.betterMove) {
+      // Calculate the angle between the ghost and Pac-Man
+      this.moveAngle = Math.atan2(pacMan.y - this.y, pacMan.x - this.x);
 
-    // Move the ghost a small step towards Pac-Man
-    const speed = this.speed; // Use the ghost's speed
-    this.x += Math.cos(angle) * speed * millisecondsPassed;
-    this.y += Math.sin(angle) * speed * millisecondsPassed;
-  } */
-
-    updatePosition(millisecondsPassed) {    
+      // Move the ghost a small step towards Pac-Man
+      this.x += Math.cos(this.moveAngle) * this.speed * millisecondsPassed;
+      this.y += Math.sin(this.moveAngle) * this.speed * millisecondsPassed;
+    } else {
       //Nota absolute value til þess að geta berað saman léttara
       this.xDistance = Math.abs(pacMan.x - this.x);
       this.yDistance = Math.abs(pacMan.y - this.y);
@@ -68,7 +65,7 @@ class Ghosts {
       if (!this.movingAxis) {
         this.movingAxis = this.xDistance > this.yDistance ? "horizontal" : "vertical";
       }
-      
+
       //Fer í áttina sem movingAxis segir til um
       if (this.movingAxis === "horizontal") {
         if (this.xDistance > this.directionMargin) {
@@ -87,6 +84,7 @@ class Ghosts {
         }
       }
     }
+  }
 
   draw() {
     //Teikna búkin
@@ -299,7 +297,8 @@ function resizeCanvas() {
 
 //initializers
 const ghostArray = [
-  pinky = new Ghosts(200, 200, 25, "pink", 5, 7, 0.2, 20)
+  pinky = new Ghosts(200, 200, 25, "pink", 5, 7, 0.2, false, 20),
+  reddy = new Ghosts(200, 200, 25, "Tomato", 5, 7, 0.2, true)
 ]
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
 resizeCanvas() //stilli upp canvas size 
