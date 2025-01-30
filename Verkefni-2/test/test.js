@@ -31,24 +31,53 @@ let pacMan = {
   },
 };
 
-class ghosts {
-  constructor(x, y, radius, fillColor, pupilOffset, pupilRadius) {
+class Ghosts {
+  constructor(x, y, radius, fillColor, pupilOffset, pupilRadius, speed) {
     this.x = x;
     this.y = y;
     this.fillColor = fillColor;
     this.radius = radius;
     this.color = "black";
     this.lineWidth = 1.5;
+    this.speed = speed
+    this.directionSpe
 
     //augu
-    this.leftEyeX = this.x - 9;
-    this.leftEyeY = this.y - 7;
-    this.rightEyeX = this.x + 9;
-    this.rightEyeY = this.y - 7;
-
     this.pupilOffset = pupilOffset;
     this.pupilRadius = pupilRadius;
   };
+
+  /* Þessi kóði hreyfir drauginn beint að pacman, í hvaða direction sem er,
+  Mjög smooth og genious.
+  updatePosition(millisecondsPassed) {
+    // Calculate the angle between the ghost and Pac-Man
+    const angle = Math.atan2(pacMan.y - this.y, pacMan.x - this.x);
+
+    // Move the ghost a small step towards Pac-Man
+    const speed = this.speed; // Use the ghost's speed
+    this.x += Math.cos(angle) * speed * millisecondsPassed;
+    this.y += Math.sin(angle) * speed * millisecondsPassed;
+  } */
+
+  updatePosition(millisecondsPassed) {
+    this.xDistance = pacMan.x - this.x
+    this.yDistance = pacMan.y - this.y
+
+    //Finn hvaða átt er nær
+    if (Math.abs(this.xDistance) > Math.abs(this.yDistance)) {
+      if (this.xDistance > 0) {
+        this.x += this.speed * millisecondsPassed;
+      } else {
+        this.x -= this.speed * millisecondsPassed;
+      }
+    } else {
+      if (this.yDistance > 0) {
+        this.y += this.speed * millisecondsPassed;
+      } else {
+        this.y -= this.speed * millisecondsPassed;
+      }
+    }
+  }
 
   draw() {
     //Teikna búkin
@@ -59,6 +88,12 @@ class ghosts {
     ctx.lineWidth = this.lineWidth;
     ctx.strokeStyle = this.color;
     ctx.stroke(); 
+
+    //Fær augu position
+    this.leftEyeX = this.x - 9;
+    this.leftEyeY = this.y - 7;
+    this.rightEyeX = this.x + 9;
+    this.rightEyeY = this.y - 7;
 
     //Teikna vinstra auga
     ctx.beginPath();
@@ -84,11 +119,11 @@ class ghosts {
     //Reikna staðsetningu á pupillunum með því að nota angle breytuna og eitthvað idk
     this.leftPupilX = this.leftEyeX + Math.cos(this.angle) * (this.radius / this.pupilOffset);
     this.leftPupilY = this.leftEyeY + Math.sin(this.angle) * (this.radius / this.pupilOffset);
-    
+
     this.rightPupilX = this.rightEyeX + Math.cos(this.angle) * (this.radius / this.pupilOffset);
     this.rightPupilY = this.rightEyeY + Math.sin(this.angle) * (this.radius / this.pupilOffset);
 
-    // Teikna vinstra pupil
+    // Teikna vinstra pupil aka. sjáaldur 
     ctx.beginPath();
     ctx.arc(this.leftPupilX, this.leftPupilY, this.radius / this.pupilRadius, 0, Math.PI * 2);
     ctx.fillStyle = "black";
@@ -105,7 +140,8 @@ class ghosts {
 //Hérna set ég öll objects sem ég vill teikna
 function drawScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  pinky.draw();
+  //Teikna alla draugana
+  ghostArray.forEach(ghost => ghost.draw());
   pacMan.draw();
   console.log(direction) //prenta út direction arrayið, alveg safe að deleta
 }
@@ -162,6 +198,9 @@ function updateGameLogic(millisecondsPassed) {
   if (direction.length !== 0) {
     lastDirection = direction[direction.length - 1];
   }
+
+  //updeita alla drauga position, með arrow function, pretty cool
+  ghostArray.forEach(ghost => ghost.updatePosition(millisecondsPassed));
   
   //Reiknar hvort að pacman sé kominn fyrir utan
   pacMan.x = Math.max(pacMan.radius, Math.min(canvas.width - pacMan.radius, pacMan.x));
@@ -250,7 +289,9 @@ function resizeCanvas() {
 }
 
 //initializers
-pinky = new ghosts(200, 200, 25, "pink", 5, 7);
+const ghostArray = [
+  pinky = new Ghosts(200, 200, 25, "pink", 5, 7, 0.2)
+]
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
 resizeCanvas() //stilli upp canvas size 
 drawScene()
