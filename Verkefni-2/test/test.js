@@ -32,15 +32,15 @@ let pacMan = {
 };
 
 class Ghosts {
-  constructor(x, y, radius, fillColor, pupilOffset, pupilRadius, speed) {
+  constructor(x, y, radius, fillColor, pupilOffset, pupilRadius, speed, directionMargin) {
     this.x = x;
     this.y = y;
     this.fillColor = fillColor;
     this.radius = radius;
     this.color = "black";
     this.lineWidth = 1.5;
-    this.speed = speed
-    this.directionSpe
+    this.speed = speed;
+    this.directionMargin = directionMargin;
 
     //augu
     this.pupilOffset = pupilOffset;
@@ -59,25 +59,34 @@ class Ghosts {
     this.y += Math.sin(angle) * speed * millisecondsPassed;
   } */
 
-  updatePosition(millisecondsPassed) {
-    this.xDistance = pacMan.x - this.x
-    this.yDistance = pacMan.y - this.y
+    updatePosition(millisecondsPassed) {    
+      //Nota absolute value til þess að geta berað saman léttara
+      this.xDistance = Math.abs(pacMan.x - this.x);
+      this.yDistance = Math.abs(pacMan.y - this.y);
 
-    //Finn hvaða átt er nær
-    if (Math.abs(this.xDistance) > Math.abs(this.yDistance)) {
-      if (this.xDistance > 0) {
-        this.x += this.speed * millisecondsPassed;
-      } else {
-        this.x -= this.speed * millisecondsPassed;
+      //Finn út hvaða átt að fara í í byrjun
+      if (!this.movingAxis) {
+        this.movingAxis = this.xDistance > this.yDistance ? "horizontal" : "vertical";
       }
-    } else {
-      if (this.yDistance > 0) {
-        this.y += this.speed * millisecondsPassed;
-      } else {
-        this.y -= this.speed * millisecondsPassed;
+      
+      //Fer í áttina sem movingAxis segir til um
+      if (this.movingAxis === "horizontal") {
+        if (this.xDistance > this.directionMargin) {
+          //Math.sign skilar 1 ef talan er jákvæð, -1 ef talan er neikvæð
+          this.x += Math.sign(pacMan.x - this.x) * this.speed * millisecondsPassed;
+        } else {
+          //ef að xDistance er minna en directionMargin þá skiptir um átt
+          //Basically þá skiptir hann um átt þegar hann er kominn nógu nálægt pacman á x ás
+          this.movingAxis = "vertical";
+        }
+      } else if (this.movingAxis === "vertical") {
+        if (this.yDistance > this.directionMargin) {
+          this.y += Math.sign(pacMan.y - this.y) * this.speed * millisecondsPassed;
+        } else {
+          this.movingAxis = "horizontal";
+        }
       }
     }
-  }
 
   draw() {
     //Teikna búkin
@@ -290,7 +299,7 @@ function resizeCanvas() {
 
 //initializers
 const ghostArray = [
-  pinky = new Ghosts(200, 200, 25, "pink", 5, 7, 0.2)
+  pinky = new Ghosts(200, 200, 25, "pink", 5, 7, 0.2, 20)
 ]
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
 resizeCanvas() //stilli upp canvas size 
