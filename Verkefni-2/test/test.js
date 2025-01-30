@@ -3,14 +3,15 @@ const ctx = canvas.getContext("2d");
 const margin = 15;
 
 let pacMan = {
-  x: 100,
-  y: 100,
+  x: canvas.width / 2,
+  y: canvas.height / 2,
   radius: 25,
   color: "black",
   lineWidth: 1.5,
   fillColor: "gold",
   rotation: 45,
   mouth: 1.5,
+  speed: 0.5,
   draw() {
     ctx.save(); //seiva stateið af canvas þannig ég geti roteitað án þess að eyðileggja allt
     ctx.translate(this.x, this.y) //set canvas starting point sem staðurinn þar sem gæinn er
@@ -28,6 +29,26 @@ let pacMan = {
     ctx.stroke();
 
     ctx.restore(); //restora canvasið
+  },
+
+  updatePosition(millisecondsPassed) {
+    if (direction[direction.length - 1] === "left") {
+      this.x -= this.speed * millisecondsPassed;
+    } else if (direction[direction.length - 1] === "right") {
+      this.x += this.speed * millisecondsPassed;
+    } else if (direction[direction.length - 1] === "up") {
+      this.y -= this.speed * millisecondsPassed;
+    } else if (direction[direction.length - 1] === "down") {
+      this.y += this.speed * millisecondsPassed;
+    }
+
+    if (direction.length !== 0) {
+      lastDirection = direction[direction.length - 1];
+    }
+
+    //Reiknar hvort að pacman sé kominn fyrir utan
+    this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+    this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));  
   },
 };
 
@@ -48,12 +69,13 @@ class Ghosts {
     this.pupilRadius = pupilRadius;
   };
 
-  updatePosition(millisecondsPassed) {    
+  updatePosition(millisecondsPassed) {   
+    //Hef tvær mismunandi movement aðferðir, meira variety 
     if (this.betterMove) {
-      // Calculate the angle between the ghost and Pac-Man
+      //Finn angle með atan2 function, finnur radians 
       this.moveAngle = Math.atan2(pacMan.y - this.y, pacMan.x - this.x);
 
-      // Move the ghost a small step towards Pac-Man
+      //Færir drauginn í áttina sem moveAngle segir til um
       this.x += Math.cos(this.moveAngle) * this.speed * millisecondsPassed;
       this.y += Math.sin(this.moveAngle) * this.speed * millisecondsPassed;
     } else {
@@ -189,29 +211,12 @@ function updateAnimation(millisecondsPassed) {
   }
 }
 
-const pacSpeed = 0.5; //pixels per millisecond
 let direction = [];
 function updateGameLogic(millisecondsPassed) {
-  if (direction[direction.length - 1] === "left") {
-      pacMan.x -= pacSpeed * millisecondsPassed;
-  } else if (direction[direction.length - 1] === "right") {
-    pacMan.x += pacSpeed * millisecondsPassed;
-  } else if (direction[direction.length - 1] === "up") {
-    pacMan.y -= pacSpeed * millisecondsPassed;
-  } else if (direction[direction.length - 1] === "down") {
-    pacMan.y += pacSpeed * millisecondsPassed;
-  }
-
-  if (direction.length !== 0) {
-    lastDirection = direction[direction.length - 1];
-  }
-
+  //Hreyfi pacman
+  pacMan.updatePosition(millisecondsPassed);
   //updeita alla drauga position, með arrow function, pretty cool
   ghostArray.forEach(ghost => ghost.updatePosition(millisecondsPassed));
-  
-  //Reiknar hvort að pacman sé kominn fyrir utan
-  pacMan.x = Math.max(pacMan.radius, Math.min(canvas.width - pacMan.radius, pacMan.x));
-  pacMan.y = Math.max(pacMan.radius, Math.min(canvas.height - pacMan.radius, pacMan.y));
 }
 
 let oldTimeStamp = 0;
