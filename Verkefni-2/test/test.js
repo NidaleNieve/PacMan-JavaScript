@@ -58,6 +58,7 @@ let pacMan = {
       this.distanceFrom = Math.sqrt((this.x - ghostArray.x)**2 + (this.y - ghostArray.y)**2);
       if (this.distanceFrom <= this.radius + ghostArray.radius) {
         this.lives--;
+        livesLost();
       }
     })
   }
@@ -188,6 +189,15 @@ function drawScene() {
   ctx.fillStyle = "white"; // Set text color
   ctx.font = "20px Arial"; // Set font size and type
   ctx.fillText("Collisions: " + pacMan.lives, 10, 30); // Draw text at top-left
+}
+
+function livesLost() {
+  gameStarted = false;
+  resizeCanvas();
+  
+  if (pacMan.lives == 0) {
+    location.reload(); //Restarta bara allri síðunni
+  }
 }
 
 //breytur fyrir munnin
@@ -333,12 +343,11 @@ function resizeCanvas() {
 
 
 //initializers
-const ghostArray = [
+ghostArray = [
   pinky = new Ghosts(500, 200, 25, "pink", 5, 7, 0.2, false, 20),
   blinky = new Ghosts(200, 200, 25, "Tomato", 5, 7, 0.2, true)
 ]
 let gameStarted = false;
-resizeCanvas() //stilli upp canvas size 
-drawScene()
+resizeCanvas()
 window.requestAnimationFrame(logicLoop); //starta loopið
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
