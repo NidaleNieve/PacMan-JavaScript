@@ -14,6 +14,7 @@ let pacMan = {
   mouth: 1.5,
   speed: 0.5,
   lives: 3,
+  score: 0,
   draw() {
     ctx.save(); //seiva stateið af canvas þannig ég geti roteitað án þess að eyðileggja allt
     ctx.translate(this.x, this.y) //set canvas starting point sem staðurinn þar sem gæinn er
@@ -54,15 +55,21 @@ let pacMan = {
   },
 
   checkCollision() {
-    ghostArray.forEach(ghostArray => {
-      this.distanceFrom = Math.sqrt((this.x - ghostArray.x)**2 + (this.y - ghostArray.y)**2);
-      if (this.distanceFrom <= this.radius + ghostArray.radius) {
+    ghostArray.forEach(ghost => {
+      this.distanceFrom = Math.sqrt((this.x - ghost.x)**2 + (this.y - ghost.y)**2);
+      if (this.distanceFrom <= this.radius + ghost.radius) {
         this.lives--;
         livesLost();
       }
     })
+    punktarArray.forEach(punktur => {
+      this.distanceFrom = Math.sqrt((this.x - punktur.x)**2 + (this.y - punktur.y)**2);
+      if (this.distanceFrom <= this.radius + punktur.radius) {
+        this.score++;
+        punktarArray.splice(punktarArray.indexOf(punktur), 1);
+      }
+    })
   }
-
 };
 
 class Ghosts {
@@ -179,24 +186,67 @@ class Ghosts {
   }
 }
 
+class Punktar {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.radius = 5;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+  }
+}
+
 //Hérna set ég öll objects sem ég vill teikna
 function drawScene() {
+  if (gameEnded == false) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  punktarArray.forEach(punktur => punktur.draw()); //Teikna punktana
   pacMan.draw();
   ghostArray.forEach(ghost => ghost.draw()); //Teikna alla draugana
-  console.log(direction) //prenta út direction arrayið, alveg safe að deleta
-  
-  ctx.fillStyle = "white"; // Set text color
-  ctx.font = "20px Arial"; // Set font size and type
-  ctx.fillText("Collisions: " + pacMan.lives, 10, 30); // Draw text at top-left
+  //Teikna Score
+  ctx.fillStyle = "white"; 
+  ctx.font = "20px Arial";
+  ctx.fillText("Lives: " + pacMan.lives + " ❤️", 10, 30);
+
+  } else { //Game over screen
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white"; 
+    ctx.font = "50px Arial";
+    let textWidth = ctx.measureText("Game Over!").width;
+    ctx.fillText("Game Over!", canvas.width / 2 - textWidth /2, canvas.height / 2.4);
+    ctx.font = "40px Arial";
+    textWidth = ctx.measureText("You scored " + pacMan.score + " points!").width;
+    ctx.fillText("You scored " + pacMan.score + " points!", canvas.width / 2 - textWidth / 2, canvas.height / 2);
+  }
 }
 
 function livesLost() {
+  //færa pacman í miðjuna
   gameStarted = false;
   resizeCanvas();
   
+  //Pása leikinn í 1 sekúndu
+  gamePaused = true;
+  setTimeout(() => {
+    gamePaused = false;
+  }, 1000);
+  
   if (pacMan.lives == 0) {
-    location.reload(); //Restarta bara allri síðunni
+    gameEnded = true;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white"; 
+    ctx.font = "20px Arial";
+    ctx.fillText("Lives: " + pacMan.lives + " ❤️", 50, 10);  
+    setTimeout(() => {
+      location.reload(); //Restarta bara allri síðunni
+    }, 3000);
   }
 }
 
@@ -238,31 +288,31 @@ function updateAnimation(millisecondsPassed) {
 
 let direction = [];
 function updateGameLogic(millisecondsPassed) {
-  //Hreyfi pacman
-  pacMan.updatePosition(millisecondsPassed);
-  //updeita alla drauga position, með arrow function, pretty cool
-  ghostArray.forEach(ghost => ghost.updatePosition(millisecondsPassed));
-  //Kallar á checkCollision fallið sem sér um að athuga hvort að pacman sé búinn að collide-a við draug
-  pacMan.checkCollision();
-
+  //Pása allt logicið þegar pacman missir líf
+  if (gamePaused == false) {
+    //Hreyfi pacman
+    pacMan.updatePosition(millisecondsPassed);
+    //updeita alla drauga position, með arrow function, pretty cool
+    ghostArray.forEach(ghost => ghost.updatePosition(millisecondsPassed));
+    //Kallar á checkCollision fallið sem sér um að athuga hvort að pacman sé búinn að collide-a við draug
+    pacMan.checkCollision();
+  }
 }
 
 let oldTimeStamp = 0;
-
 function logicLoop(timeStamp) {
-    //tíminn sem hefur liðið er tíminn sem er núna mínus tíminn sem var síðast þegar það var keyrt
-    let millisecondsPassed = (timeStamp - oldTimeStamp);
-    oldTimeStamp = timeStamp;
+  //tíminn sem hefur liðið er tíminn sem er núna mínus tíminn sem var síðast þegar það var keyrt
+  let millisecondsPassed = (timeStamp - oldTimeStamp);
+  oldTimeStamp = timeStamp;
 
-    //Kallar á game lykkjuna sem sér um hreyfingu ofl.
-    updateGameLogic(millisecondsPassed);
-    //Kallar á animation lykkjuna sem sér um munnin á pac man
-    updateAnimation(millisecondsPassed);
-    //teikna allt
-    drawScene();
-    
-    //kallar á sig sjálft aftur, þannig að það verði loop
-    window.requestAnimationFrame(logicLoop);
+  //Kallar á game lykkjuna sem sér um hreyfingu ofl.
+  updateGameLogic(millisecondsPassed);
+  //Kallar á animation lykkjuna sem sér um munnin á pac man
+  updateAnimation(millisecondsPassed);
+  //teikna allt
+  drawScene();
+  //kallar á sig sjálft aftur, þannig að það verði loop
+  window.requestAnimationFrame(logicLoop);
 }
 
 //Controls
@@ -332,22 +382,42 @@ function resizeCanvas() {
   pacMan.x = pacMan.x / widthOld * canvas.width;
   pacMan.y = pacMan.y / heightOld * canvas.height;
 
+  punktarArray.forEach(punktur => {
+    punktur.x = punktur.x / widthOld * canvas.width;
+    punktur.y = punktur.y / heightOld * canvas.height;
+  });
+  /*
+  ghostArray.forEach(ghost => {
+    ghost.x = ghost.x / widthOld * canvas.width;
+  });
+  */
   //Starta leikinn með PacMan í miðjunni
   if (!gameStarted) {
     pacMan.x = canvas.width / 2;
     pacMan.y = canvas.height / 2;
     gameStarted = true;
-}
+
+    //starta
+    ghostArray = [
+      pinky = new Ghosts(canvas.width / 4, canvas.height / 1.3, 35, "pink", 7, 6, 0.2, false, 20),
+      blinky = new Ghosts(canvas.width / 1.3, canvas.height / 4, 25, "Tomato", 5, 7, 0.25, true),
+      inky = new Ghosts(canvas.width / 1.3, canvas.height / 1.3, 25, "Cyan", 6, 10, 0.4, false, 50),
+      clyde = new Ghosts(canvas.width / 4, canvas.height / 4, 25, "orange", 5, 6, 0.17, true)
+    ]
+  }
   drawScene(); // Redraw the scene
 }
 
-
 //initializers
-ghostArray = [
-  pinky = new Ghosts(500, 200, 25, "pink", 5, 7, 0.2, false, 20),
-  blinky = new Ghosts(200, 200, 25, "Tomato", 5, 7, 0.2, true)
-]
+
+punktarArray = []
+for (let i = 0; i < 10; i++) {
+  punktarArray.push(new Punktar());
+}
 let gameStarted = false;
+let gameEnded = false;
+let gamePaused = false;
 resizeCanvas()
+gamePaused = true;
 window.requestAnimationFrame(logicLoop); //starta loopið
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
