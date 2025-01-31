@@ -190,7 +190,7 @@ class Punktar {
   constructor() {
     this.x = Math.random() * canvas.width;
     this.y = Math.random() * canvas.height;
-    this.radius = 5;
+    this.radius = 7;
   }
   draw() {
     ctx.beginPath();
@@ -205,25 +205,41 @@ class Punktar {
 
 //Hérna set ég öll objects sem ég vill teikna
 function drawScene() {
-  if (gameEnded == false) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  punktarArray.forEach(punktur => punktur.draw()); //Teikna punktana
-  pacMan.draw();
-  ghostArray.forEach(ghost => ghost.draw()); //Teikna alla draugana
-  //Teikna Score
-  ctx.fillStyle = "white"; 
-  ctx.font = "20px Arial";
-  ctx.fillText("Lives: " + pacMan.lives + " ❤️", 10, 30);
-
-  } else { //Game over screen
+  if (gameEnded == false) { //default lykkjan
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    punktarArray.forEach(punktur => punktur.draw()); //Teikna punktana
+    pacMan.draw();
+    ghostArray.forEach(ghost => ghost.draw()); //Teikna alla draugana
+    //Teikna Score
     ctx.fillStyle = "white"; 
-    ctx.font = "50px Arial";
-    let textWidth = ctx.measureText("Game Over!").width;
-    ctx.fillText("Game Over!", canvas.width / 2 - textWidth /2, canvas.height / 2.4);
-    ctx.font = "40px Arial";
-    textWidth = ctx.measureText("You scored " + pacMan.score + " points!").width;
-    ctx.fillText("You scored " + pacMan.score + " points!", canvas.width / 2 - textWidth / 2, canvas.height / 2);
+    ctx.font = "20px Arial";
+    ctx.fillText("Lives: " + pacMan.lives + " ❤️", 10, 30);
+    ctx.fillText("Score: " + pacMan.score, 10, 60);
+    if (gameStart) { //Start prompt
+      ctx.fillStyle = "white"; 
+      ctx.font = "50px Arial";
+      let textWidth = ctx.measureText("Ready?").width;
+      ctx.fillText("Ready?", canvas.width / 2 - textWidth /2, canvas.height / 2.4);
+    }
+  } else if (gameEnded) { //Game over screen
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white"; 
+      ctx.font = "50px Arial";
+      let textWidth = ctx.measureText("Game Over!").width;
+      ctx.fillText("Game Over!", canvas.width / 2 - textWidth /2, canvas.height / 2.4);
+      ctx.font = "40px Arial";
+      textWidth = ctx.measureText("You scored " + pacMan.score + " points!").width;
+      ctx.fillText("You scored " + pacMan.score + " points!", canvas.width / 2 - textWidth / 2, canvas.height / 2);
+  } 
+  if (pacMan.score >= 10) { //Win Screen condition og display
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white"; 
+      ctx.font = "50px Arial";
+      let textWidth = ctx.measureText("You Win!").width;
+      ctx.fillText("You Win!", canvas.width / 2 - textWidth /2, canvas.height / 2.4);
+      setTimeout(() => {
+        location.reload(); //Restarta  allri síðunni
+      }, 3000);
   }
 }
 
@@ -240,10 +256,6 @@ function livesLost() {
   
   if (pacMan.lives == 0) {
     gameEnded = true;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white"; 
-    ctx.font = "20px Arial";
-    ctx.fillText("Lives: " + pacMan.lives + " ❤️", 50, 10);  
     setTimeout(() => {
       location.reload(); //Restarta bara allri síðunni
     }, 3000);
@@ -386,18 +398,13 @@ function resizeCanvas() {
     punktur.x = punktur.x / widthOld * canvas.width;
     punktur.y = punktur.y / heightOld * canvas.height;
   });
-  /*
-  ghostArray.forEach(ghost => {
-    ghost.x = ghost.x / widthOld * canvas.width;
-  });
-  */
   //Starta leikinn með PacMan í miðjunni
   if (!gameStarted) {
     pacMan.x = canvas.width / 2;
     pacMan.y = canvas.height / 2;
     gameStarted = true;
 
-    //starta
+    //Bý til draugana
     ghostArray = [
       pinky = new Ghosts(canvas.width / 4, canvas.height / 1.3, 35, "pink", 7, 6, 0.2, false, 20),
       blinky = new Ghosts(canvas.width / 1.3, canvas.height / 4, 25, "Tomato", 5, 7, 0.25, true),
@@ -416,8 +423,14 @@ for (let i = 0; i < 10; i++) {
 }
 let gameStarted = false;
 let gameEnded = false;
-let gamePaused = false;
+let gamePaused = true;
+let gameStart = true;
+
 resizeCanvas()
-gamePaused = true;
+
 window.requestAnimationFrame(logicLoop); //starta loopið
+setTimeout(() => {  
+  gamePaused = false;
+  gameStart = false;
+}, 1500);
 window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
