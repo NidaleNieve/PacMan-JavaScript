@@ -3,8 +3,9 @@ const ctx = canvas.getContext("2d");
 const margin = 15;
 
 let pacMan = {
-  x: canvas.width / 2,
-  y: canvas.height / 2,
+  //X og y skipta í rauninni ekki máli
+  x: 200,
+  y: 200,
   radius: 25,
   color: "black",
   lineWidth: 1.5,
@@ -12,6 +13,7 @@ let pacMan = {
   rotation: 45,
   mouth: 1.5,
   speed: 0.5,
+  lives: 3,
   draw() {
     ctx.save(); //seiva stateið af canvas þannig ég geti roteitað án þess að eyðileggja allt
     ctx.translate(this.x, this.y) //set canvas starting point sem staðurinn þar sem gæinn er
@@ -50,6 +52,16 @@ let pacMan = {
     this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
     this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));  
   },
+
+  checkCollision() {
+    ghostArray.forEach(ghostArray => {
+      this.distanceFrom = Math.sqrt((this.x - ghostArray.x)**2 + (this.y - ghostArray.y)**2);
+      if (this.distanceFrom <= this.radius + ghostArray.radius) {
+        this.lives--;
+      }
+    })
+  }
+
 };
 
 class Ghosts {
@@ -169,10 +181,13 @@ class Ghosts {
 //Hérna set ég öll objects sem ég vill teikna
 function drawScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //Teikna alla draugana
-  ghostArray.forEach(ghost => ghost.draw());
   pacMan.draw();
+  ghostArray.forEach(ghost => ghost.draw()); //Teikna alla draugana
   console.log(direction) //prenta út direction arrayið, alveg safe að deleta
+  
+  ctx.fillStyle = "white"; // Set text color
+  ctx.font = "20px Arial"; // Set font size and type
+  ctx.fillText("Collisions: " + pacMan.lives, 10, 30); // Draw text at top-left
 }
 
 //breytur fyrir munnin
@@ -217,6 +232,9 @@ function updateGameLogic(millisecondsPassed) {
   pacMan.updatePosition(millisecondsPassed);
   //updeita alla drauga position, með arrow function, pretty cool
   ghostArray.forEach(ghost => ghost.updatePosition(millisecondsPassed));
+  //Kallar á checkCollision fallið sem sér um að athuga hvort að pacman sé búinn að collide-a við draug
+  pacMan.checkCollision();
+
 }
 
 let oldTimeStamp = 0;
@@ -295,17 +313,32 @@ document.addEventListener('keyup', (event) => {
 });
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth - margin * 2;
-    canvas.height = window.innerHeight - margin * 2;
-    drawScene(); //teiknar senuna aftur þannig það sé ekki fucked
+  //Breytur sem innihalda gömlu stærðina á canvasinu
+  const widthOld = canvas.width;
+  const heightOld = canvas.height;
+  canvas.width = window.innerWidth - margin * 2;
+  canvas.height = window.innerHeight - margin * 2;
+  //Breyti staðsetningu pacman með því að deila staðsetningu pacans með gömly stærðina og margfalda með nýju stærðina
+  pacMan.x = pacMan.x / widthOld * canvas.width;
+  pacMan.y = pacMan.y / heightOld * canvas.height;
+
+  //Starta leikinn með PacMan í miðjunni
+  if (!gameStarted) {
+    pacMan.x = canvas.width / 2;
+    pacMan.y = canvas.height / 2;
+    gameStarted = true;
 }
+  drawScene(); // Redraw the scene
+}
+
 
 //initializers
 const ghostArray = [
-  pinky = new Ghosts(200, 200, 25, "pink", 5, 7, 0.2, false, 20),
-  reddy = new Ghosts(200, 200, 25, "Tomato", 5, 7, 0.2, true)
+  pinky = new Ghosts(500, 200, 25, "pink", 5, 7, 0.2, false, 20),
+  blinky = new Ghosts(200, 200, 25, "Tomato", 5, 7, 0.2, true)
 ]
-window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
+let gameStarted = false;
 resizeCanvas() //stilli upp canvas size 
 drawScene()
 window.requestAnimationFrame(logicLoop); //starta loopið
+window.addEventListener("resize", resizeCanvas); //ef að resiza kallar á resize fallið
