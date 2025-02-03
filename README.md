@@ -1,1 +1,1 @@
-## Basic Pac-Man game in JavaScrip
+## Basic Pac-Man game in JavaScript
